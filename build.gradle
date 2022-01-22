@@ -5,7 +5,7 @@ plugins {
 
 group 'com.xiaohaoo'
 version '1.0'
-
+url
 repositories {
     mavenCentral()
 }
@@ -29,3 +29,35 @@ gradlePlugin {
     }
 }
 
+ def url = ''
+
+publishing {
+    publications {
+        mavenGradlePlugin(MavenPublication) {
+            pom {
+                name = 'My Library'
+                description = 'A concise description of my library'
+                url = 'http://www.example.com/library'
+
+                licenses {
+                    license {
+                        name = 'GNU AFFERO GENERAL PUBLIC LICENSE, Version 3'
+                        url = 'http://www.gnu.org/licenses/agpl-3.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'xiaohao'
+                        name = 'xiaohao'
+                        email = 'sdwenhappy@163.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://example.com/my-library.git'
+                    developerConnection = 'scm:git:ssh://example.com/my-library.git'
+                    url = 'http://example.com/my-library/'
+                }
+            }
+        }
+    }
+}

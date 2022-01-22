@@ -20,10 +20,16 @@ public class MavenPublishingPlugin implements Plugin<Project> {
     @Override
     public void apply(Project rootProject) {
         rootProject.afterEvaluate(project -> {
+
+
             final String name = project.getName();
             final String version = String.valueOf(project.getVersion());
             final String group = String.valueOf(project.getGroup());
             Map<String, ?> projectProperties = project.getProperties();
+
+            //配置官方发布插件中的名字
+            final String publicationName = "xiaohaoMavenPublishing";
+
 
             //应用官方MavenPublishPlugin
             project.getPluginManager().apply(MavenPublishPlugin.class);
@@ -55,7 +61,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
             //配置发布信息
             publishingExtension.publications(publications -> {
-                MavenPublication mavenPublishing = publications.create("xiaohaoMavenPublishing", MavenPublication.class);
+                MavenPublication mavenPublishing = publications.create(publicationName, MavenPublication.class);
                 mavenPublishing.setGroupId(group);
                 mavenPublishing.setArtifactId(name);
                 mavenPublishing.setVersion(version);
@@ -72,8 +78,8 @@ public class MavenPublishingPlugin implements Plugin<Project> {
                     });
 
                     mavenPom.licenses(mavenPomLicenseSpec -> mavenPomLicenseSpec.license(mavenPomLicense -> {
-                        mavenPomLicense.getName().set("The Apache License, Version 2.0");
-                        mavenPomLicense.getUrl().set("http://www.apache.org/licenses/LICENSE-2.0.txt");
+                        mavenPomLicense.getName().set("GNU AFFERO GENERAL PUBLIC LICENSE, Version 3");
+                        mavenPomLicense.getUrl().set("http://www.gnu.org/licenses/agpl-3.0.txt");
                     }));
 
                     mavenPom.developers(mavenPomDeveloperSpec -> mavenPomDeveloperSpec.developer(mavenPomDeveloper -> {
@@ -86,7 +92,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
             //配置签名
             project.getExtensions().configure(SigningExtension.class,
-                signingExtension -> signingExtension.sign(publishingExtension.getPublications().getByName("mavenPublishing")));
+                signingExtension -> signingExtension.sign(publishingExtension.getPublications().getByName(publicationName)));
         });
     }
 }
