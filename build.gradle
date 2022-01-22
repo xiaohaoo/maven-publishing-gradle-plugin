@@ -8,6 +8,7 @@ group 'com.xiaohaoo'
 version '1.0'
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -29,15 +30,34 @@ gradlePlugin {
     }
 }
 
-def url = 'https://github.com/xiaohaoo/maven-publishing-gradle-plugin'
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+
+javadoc {
+    options {
+        encoding = 'utf8'
+        charSet = 'utf8'
+    }
+    options.tags = ["date"]
+}
+
+def gitUrl = 'https://github.com/xiaohaoo/maven-publishing-gradle-plugin'
 
 publishing {
     publications {
-        mavenGradlePlugin(MavenPublication) {
+        mavenJava(MavenPublication) {
+            groupId = project.group
+            artifactId = project.name
+            version = project.version
+            from components.java
             pom {
                 name = project.name
-                description = 'A concise description of my library'
-                url = url
+                description = 'gradle发布到maven仓库插件'
+                url = gitUrl
 
                 licenses {
                     license {
@@ -53,28 +73,27 @@ publishing {
                     }
                 }
                 scm {
-                    connection = String.format("%s.git", url.replace("https", "scm:git:git"))
-                    developerConnection = String.format("%s.git", url.replace("https", "scm:git:ssh"))
-                    url = url
+                    connection = String.format("%s.git", gitUrl.replace("https", "scm:git:git"))
+                    developerConnection = String.format("%s.git", gitUrl.replace("https", "scm:git:ssh"))
+                    url = gitUrl
                 }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "mavenCenter"
+            url = version.endsWith("SNAPSHOT") ? 'https://s01.oss.sonatype.org/content/repositories/snapshots/' : 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
             }
         }
     }
 }
 
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
 
 signing {
-    sign publishing.publications.mavenGradlePlugin
+    sign publishing.publications.mavenJava
 }
 
-javadoc {
-    options {
-        encoding = 'utf8'
-        charSet = 'utf8'
-    }
-    options.tags = ["date"]
-}
