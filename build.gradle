@@ -1,11 +1,11 @@
 plugins {
     id 'java-gradle-plugin'
     id 'maven-publish'
+    id 'signing'
 }
 
 group 'com.xiaohaoo'
 version '1.0'
-url
 repositories {
     mavenCentral()
 }
@@ -29,15 +29,15 @@ gradlePlugin {
     }
 }
 
- def url = ''
+def url = 'https://github.com/xiaohaoo/maven-publishing-gradle-plugin'
 
 publishing {
     publications {
         mavenGradlePlugin(MavenPublication) {
             pom {
-                name = 'My Library'
+                name = project.name
                 description = 'A concise description of my library'
-                url = 'http://www.example.com/library'
+                url = url
 
                 licenses {
                     license {
@@ -53,11 +53,28 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:git://example.com/my-library.git'
-                    developerConnection = 'scm:git:ssh://example.com/my-library.git'
-                    url = 'http://example.com/my-library/'
+                    connection = String.format("%s.git", url.replace("https", "scm:git:git"))
+                    developerConnection = String.format("%s.git", url.replace("https", "scm:git:ssh"))
+                    url = url
                 }
             }
         }
     }
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+signing {
+    sign publishing.publications.mavenGradlePlugin
+}
+
+javadoc {
+    options {
+        encoding = 'utf8'
+        charSet = 'utf8'
+    }
+    options.tags = ["date"]
 }
