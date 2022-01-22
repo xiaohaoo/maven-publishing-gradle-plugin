@@ -1,17 +1,14 @@
 package com.xiaohaoo.gradle.plugin;
 
-import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
-import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.plugins.signing.SigningExtension;
 import org.gradle.plugins.signing.SigningPlugin;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -97,15 +94,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
             project.getExtensions().configure(SigningExtension.class,
                 signingExtension -> signingExtension.sign(publishingExtension.getPublications().getByName(publicationName)));
 
-            project.getExtensions().configure(Javadoc.class, new Action<Javadoc>() {
-                @Override
-                public void execute(Javadoc javadoc) {
-                    javadoc.options(minimalJavadocOptions -> {
-                        minimalJavadocOptions.encoding("UTF-8");
-                        minimalJavadocOptions.setJFlags(List.of("date"));
-                    });
-                }
-            });
+
             project.getLogger().info("自定义发布插件配置成功");
         });
     }
