@@ -20,8 +20,6 @@ public class MavenPublishingPlugin implements Plugin<Project> {
     @Override
     public void apply(Project rootProject) {
         rootProject.afterEvaluate(project -> {
-
-
             final String name = project.getName();
             final String version = String.valueOf(project.getVersion());
             final String group = String.valueOf(project.getGroup());
