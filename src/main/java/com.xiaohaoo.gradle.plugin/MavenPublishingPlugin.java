@@ -19,86 +19,135 @@ import java.util.Map;
  * @date 2022/1/22 8:37 PM
  */
 public class MavenPublishingPlugin implements Plugin<Project> {
+
+    private final String publicationName = "xiaohaoMavenPublishing";
+
     @Override
     public void apply(Project rootProject) {
+
+        //应用官方MavenPublishPlugin
+        applyPlugins(rootProject);
+
+        //常见自定义发布信息的extension
+        rootProject.getExtensions().create(publicationName, MavenPublishingPluginExtension.class);
+
+        //配置发布产物
+        configureJavaPluginExtension(rootProject);
+
         rootProject.afterEvaluate(project -> {
-            final String name = project.getName();
-            final String version = String.valueOf(project.getVersion());
-            final String group = String.valueOf(project.getGroup());
-            Map<String, ?> projectProperties = project.getProperties();
-
-            //配置官方发布插件中的名字
-            final String publicationName = "xiaohaoMavenPublishing";
-
-
-            //应用官方MavenPublishPlugin
-            project.getPluginManager().apply(MavenPublishPlugin.class);
-            project.getPluginManager().apply(SigningPlugin.class);
-
-            //配置发布产物
-            project.getExtensions().configure(JavaPluginExtension.class, javaPluginExtension -> {
-                javaPluginExtension.withJavadocJar();
-                javaPluginExtension.withJavadocJar();
-            });
-
             //发布信息配置
-            PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
-
-            //自定义配置发布信息
-            MavenPublishingPluginExtension mavenPublishingPluginExtension = project.getExtensions().create("xiaohaoMavenPublishing",
-                MavenPublishingPluginExtension.class);
-
-            //配置发布仓库
-            publishingExtension.repositories(artifactRepositories -> artifactRepositories.maven(mavenArtifactRepository -> {
-                final String snapshotUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/";
-                final String releaseUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/";
-                mavenArtifactRepository.artifactUrls(version.endsWith("SNAPSHOT") ? snapshotUrl : releaseUrl);
-                mavenArtifactRepository.credentials(passwordCredentials -> {
-                    passwordCredentials.setUsername(String.valueOf(projectProperties.get("ossrhUsername")));
-                    passwordCredentials.setPassword(String.valueOf(projectProperties.get("ossrhPassword")));
-                });
-            }));
-
-            //配置发布信息
-            publishingExtension.publications(publications -> {
-                MavenPublication mavenPublishing = publications.create(publicationName, MavenPublication.class);
-                mavenPublishing.setGroupId(group);
-                mavenPublishing.setArtifactId(name);
-                mavenPublishing.setVersion(version);
-
-                mavenPublishing.from(project.getComponents().getByName("java"));
-                mavenPublishing.pom(mavenPom -> {
-                    mavenPom.getName().set(name);
-                    mavenPom.getDescription().set(mavenPublishingPluginExtension.getDescription());
-                    mavenPom.getUrl().set(mavenPublishingPluginExtension.getUrl());
-                    mavenPom.scm(mavenPomScm -> {
-                        mavenPomScm.getConnection().set(mavenPublishingPluginExtension.getUrl());
-                        mavenPomScm.getDeveloperConnection().set(mavenPublishingPluginExtension.getUrl());
-                        mavenPomScm.getUrl().set(mavenPublishingPluginExtension.getUrl());
-                    });
-
-                    mavenPom.licenses(mavenPomLicenseSpec -> mavenPomLicenseSpec.license(mavenPomLicense -> {
-                        mavenPomLicense.getName().set("GNU AFFERO GENERAL PUBLIC LICENSE, Version 3");
-                        mavenPomLicense.getUrl().set("http://www.gnu.org/licenses/agpl-3.0.txt");
-                    }));
-
-                    mavenPom.developers(mavenPomDeveloperSpec -> mavenPomDeveloperSpec.developer(mavenPomDeveloper -> {
-                        mavenPomDeveloper.getId().set("xiaohao");
-                        mavenPomDeveloper.getName().set("xiaohao");
-                        mavenPomDeveloper.getEmail().set("sdwenhappy@163.com");
-                    }));
-                });
-            });
+            configurePublishingExtension(project);
 
             //配置签名
-            project.getExtensions().configure(SigningExtension.class,
-                signingExtension -> signingExtension.sign(publishingExtension.getPublications().getByName(publicationName)));
-
+            configureSigningExtension(project);
 
             //配置javadoc
-            project.getTasks().withType(Javadoc.class, javadoc -> javadoc.options(MinimalJavadocOptions::quiet));
+            configureJavadoc(project);
 
-            project.getLogger().info("自定义发布插件配置成功");
+            project.getLogger().info("{}：自定义发布插件配置成功", getClass());
         });
     }
+
+    /**
+     * 配置官方插件maven-publishing的发布信息以及task
+     * @param project 项目
+     */
+    public void configurePublishingExtension(Project project) {
+        PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
+        MavenPublishingPluginExtension mavenPublishingPluginExtension = project.getExtensions().getByType(MavenPublishingPluginExtension.class);
+        final String name = project.getName();
+        final String version = String.valueOf(project.getVersion());
+        final String group = String.valueOf(project.getGroup());
+        Map<String, ?> projectProperties = project.getProperties();
+
+        //配置发布仓库
+        publishingExtension.repositories(artifactRepositories -> artifactRepositories.maven(mavenArtifactRepository -> {
+            final String snapshotUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/";
+            final String releaseUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/";
+            mavenArtifactRepository.setName("MavenCenter");
+            mavenArtifactRepository.setUrl(version.endsWith("SNAPSHOT") ? snapshotUrl : releaseUrl);
+            mavenArtifactRepository.credentials(passwordCredentials -> {
+                passwordCredentials.setUsername(String.valueOf(projectProperties.get("ossrhUsername")));
+                passwordCredentials.setPassword(String.valueOf(projectProperties.get("ossrhPassword")));
+            });
+        }));
+
+        //配置发布信息
+        publishingExtension.publications(publications -> {
+            MavenPublication mavenPublishing = publications.create(publicationName, MavenPublication.class);
+            mavenPublishing.setGroupId(group);
+            mavenPublishing.setArtifactId(name);
+            mavenPublishing.setVersion(version);
+
+            mavenPublishing.from(project.getComponents().getByName("java"));
+
+            mavenPublishing.pom(mavenPom -> {
+                mavenPom.getName().set(name);
+                mavenPom.getDescription().set(mavenPublishingPluginExtension.getDescription());
+                mavenPom.getUrl().set(mavenPublishingPluginExtension.getUrl());
+                mavenPom.scm(mavenPomScm -> {
+                    mavenPomScm.getConnection().set(mavenPublishingPluginExtension.getUrl());
+                    mavenPomScm.getDeveloperConnection().set(mavenPublishingPluginExtension.getUrl());
+                    mavenPomScm.getUrl().set(mavenPublishingPluginExtension.getUrl());
+                });
+
+                project.getLogger().info("{}：mavenPublishingPluginExtension配置信息：{}", getClass(), mavenPublishingPluginExtension);
+
+                mavenPom.licenses(mavenPomLicenseSpec -> mavenPomLicenseSpec.license(mavenPomLicense -> {
+                    mavenPomLicense.getName().set("GNU AFFERO GENERAL PUBLIC LICENSE, Version 3");
+                    mavenPomLicense.getUrl().set("http://www.gnu.org/licenses/agpl-3.0.txt");
+                }));
+
+                mavenPom.developers(mavenPomDeveloperSpec -> mavenPomDeveloperSpec.developer(mavenPomDeveloper -> {
+                    mavenPomDeveloper.getId().set("xiaohao");
+                    mavenPomDeveloper.getName().set("xiaohao");
+                    mavenPomDeveloper.getEmail().set("sdwenhappy@163.com");
+                    project.getLogger().info("{}：mavenPomDeveloper配置信息：{}", getClass(), mavenPomDeveloper);
+
+                }));
+            });
+        });
+    }
+
+    /**
+     * 配置签名信息
+     * @param project 项目
+     */
+    public void configureSigningExtension(Project project) {
+        SigningExtension signingExtension = project.getExtensions().getByType(SigningExtension.class);
+        PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
+        signingExtension.sign(publishingExtension.getPublications().getByName(publicationName));
+    }
+
+    /**
+     * 配置javadoc任务
+     * @param project 项目
+     */
+    public void configureJavadoc(Project project) {
+        project.getTasks().withType(Javadoc.class, javadoc -> javadoc.options(MinimalJavadocOptions::quiet));
+    }
+
+
+    /**
+     * 配置JavaPlugin
+     * @param project
+     */
+    public void configureJavaPluginExtension(Project project) {
+        project.getExtensions().configure(JavaPluginExtension.class, javaPluginExtension -> {
+            javaPluginExtension.withJavadocJar();
+            javaPluginExtension.withJavadocJar();
+        });
+    }
+
+
+    /**
+     * 启用官方插件
+     * @param project
+     */
+    public void applyPlugins(Project project) {
+        project.getPluginManager().apply(MavenPublishPlugin.class);
+        project.getPluginManager().apply(SigningPlugin.class);
+    }
+
+
 }
