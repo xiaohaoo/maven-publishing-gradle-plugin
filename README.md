@@ -19,4 +19,11 @@ buildscript {
 }
 
 apply plugin: 'com.xiaohaoo.maven-publishing'
+
+//发布配置
+xiaohaoMavenPublishing {
+    url = "https://github.com/xiaohaoo/maven-publishing-gradle-plugin"
+    description = "发布到maven仓库的gradle插件"
+}
+
 ```
