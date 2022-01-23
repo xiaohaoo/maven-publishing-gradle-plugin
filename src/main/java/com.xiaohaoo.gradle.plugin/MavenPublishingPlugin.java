@@ -154,7 +154,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
     public void configureJavaPluginExtension(Project project) {
         project.getExtensions().configure(JavaPluginExtension.class, javaPluginExtension -> {
             javaPluginExtension.withJavadocJar();
-            javaPluginExtension.withJavadocJar();
+            javaPluginExtension.withSourcesJar();
         });
     }
 
