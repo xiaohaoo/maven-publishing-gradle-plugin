@@ -104,8 +104,9 @@ public class MavenPublishingPlugin implements Plugin<Project> {
                 mavenPom.getDescription().set(mavenPublishingPluginExtension.getDescription());
                 mavenPom.getUrl().set(mavenPublishingPluginExtension.getUrl());
                 mavenPom.scm(mavenPomScm -> {
-                    mavenPomScm.getConnection().set(mavenPublishingPluginExtension.getUrl());
-                    mavenPomScm.getDeveloperConnection().set(mavenPublishingPluginExtension.getUrl());
+                    final String gitUrl = mavenPublishingPluginExtension.getUrl();
+                    mavenPomScm.getConnection().set(String.format("%s.git", gitUrl.replaceAll("https[s]?", "scm:git:git")));
+                    mavenPomScm.getDeveloperConnection().set(String.format("%s.git", gitUrl.replaceAll("https[s]?", "scm:git:ssh")));
                     mavenPomScm.getUrl().set(mavenPublishingPluginExtension.getUrl());
                 });
 
