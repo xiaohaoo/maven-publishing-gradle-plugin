@@ -45,6 +45,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
             configureJavadoc(project);
 
             project.getLogger().info("{}：自定义发布插件配置成功", getClass());
+
         });
     }
 
