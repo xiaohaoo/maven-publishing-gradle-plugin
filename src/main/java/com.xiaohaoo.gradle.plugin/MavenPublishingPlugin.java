@@ -6,6 +6,8 @@ import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
+import org.gradle.api.tasks.javadoc.Javadoc;
+import org.gradle.external.javadoc.MinimalJavadocOptions;
 import org.gradle.plugins.signing.SigningExtension;
 import org.gradle.plugins.signing.SigningPlugin;
 
@@ -92,6 +94,9 @@ public class MavenPublishingPlugin implements Plugin<Project> {
             project.getExtensions().configure(SigningExtension.class,
                 signingExtension -> signingExtension.sign(publishingExtension.getPublications().getByName(publicationName)));
 
+
+            //配置javadoc
+            project.getTasks().withType(Javadoc.class, javadoc -> javadoc.options(MinimalJavadocOptions::quiet));
 
             project.getLogger().info("自定义发布插件配置成功");
         });

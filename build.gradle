@@ -42,7 +42,9 @@ javadoc {
         encoding = 'utf8'
         charSet = 'utf8'
     }
-    options.tags = ["date"]
+    if (JavaVersion.current().isJava8Compatible()) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
 }
 
 def gitUrl = 'https://github.com/xiaohaoo/maven-publishing-gradle-plugin'
