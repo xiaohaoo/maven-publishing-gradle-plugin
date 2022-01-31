@@ -45,13 +45,14 @@ public class MavenPublishingPlugin implements Plugin<Project> {
         //应用官方MavenPublishPlugin
         applyPlugins(rootProject);
 
-        //常见自定义发布信息的extension
-        rootProject.getExtensions().create(publicationName, MavenPublishingPluginExtension.class);
-
         //配置发布产物
         configureJavaPluginExtension(rootProject);
 
+
+        rootProject.getExtensions().create(publicationName, MavenPublishingPluginExtension.class);
+
         rootProject.afterEvaluate(project -> {
+
             //发布信息配置
             configurePublishingExtension(project);
 
@@ -130,7 +131,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
     /**
      * 配置签名信息
-     * @param project 项目
+     * @param project {@code Project}
      */
     public void configureSigningExtension(Project project) {
         SigningExtension signingExtension = project.getExtensions().getByType(SigningExtension.class);
@@ -140,7 +141,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
     /**
      * 配置javadoc任务
-     * @param project 项目
+     * @param project {@code Project}
      */
     public void configureJavadoc(Project project) {
         project.getTasks().withType(Javadoc.class, javadoc -> javadoc.options(MinimalJavadocOptions::quiet));
@@ -149,7 +150,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
     /**
      * 配置JavaPlugin
-     * @param project
+     * @param project {@code Project}
      */
     public void configureJavaPluginExtension(Project project) {
         project.getExtensions().configure(JavaPluginExtension.class, javaPluginExtension -> {
@@ -161,7 +162,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
     /**
      * 启用官方插件
-     * @param project
+     * @param project {@code Project}
      */
     public void applyPlugins(Project project) {
         project.getPluginManager().apply(MavenPublishPlugin.class);
