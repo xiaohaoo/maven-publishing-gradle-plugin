@@ -48,12 +48,10 @@ public class MavenPublishingPlugin implements Plugin<Project> {
         //创建自定义的MavenPublishingPluginExtension
         rootProject.getExtensions().create(publicationName, MavenPublishingPluginExtension.class);
 
-
         rootProject.afterEvaluate(project -> {
 
             //配置发布产物
             configureJavaPluginExtension(rootProject);
-
 
             //发布信息配置
             configurePublishingExtension(project);
@@ -170,6 +168,5 @@ public class MavenPublishingPlugin implements Plugin<Project> {
         project.getPluginManager().apply(MavenPublishPlugin.class);
         project.getPluginManager().apply(SigningPlugin.class);
     }
-
 
 }
