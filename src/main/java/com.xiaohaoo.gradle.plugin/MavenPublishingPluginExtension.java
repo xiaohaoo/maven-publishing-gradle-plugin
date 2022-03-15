@@ -17,7 +17,9 @@
 
 package com.xiaohaoo.gradle.plugin;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * @author xiaohao
@@ -27,9 +29,7 @@ import lombok.*;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@ToString
 public class MavenPublishingPluginExtension {
     private String description;
     private String url;
