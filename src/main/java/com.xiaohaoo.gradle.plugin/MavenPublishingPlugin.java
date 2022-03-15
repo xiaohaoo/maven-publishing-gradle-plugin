@@ -24,7 +24,7 @@ import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.api.tasks.javadoc.Javadoc;
-import org.gradle.external.javadoc.MinimalJavadocOptions;
+import org.gradle.external.javadoc.StandardJavadocDocletOptions;
 import org.gradle.plugins.signing.SigningExtension;
 import org.gradle.plugins.signing.SigningPlugin;
 
@@ -144,7 +144,13 @@ public class MavenPublishingPlugin implements Plugin<Project> {
      * @param project {@code Project}
      */
     public void configureJavadoc(Project project) {
-        project.getTasks().withType(Javadoc.class, javadoc -> javadoc.options(MinimalJavadocOptions::quiet));
+        project.getTasks().withType(Javadoc.class, javadoc -> {
+            javadoc.options(minimalJavadocOptions -> {
+                if (minimalJavadocOptions instanceof StandardJavadocDocletOptions) {
+                    ((StandardJavadocDocletOptions) minimalJavadocOptions).addStringOption("Xdoclint:none", "-quiet");
+                }
+            });
+        });
     }
 
 
