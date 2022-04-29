@@ -11,6 +11,7 @@
 ```gradle
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
     }
     dependencies {

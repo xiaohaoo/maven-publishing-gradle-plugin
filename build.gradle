@@ -12,10 +12,6 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    testCompileOnly 'org.projectlombok:lombok:1.18.22'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 }
 
 test {
@@ -38,10 +34,6 @@ java {
 
 
 javadoc {
-    options {
-        encoding = 'utf8'
-        charSet = 'utf8'
-    }
     if (JavaVersion.current().isJava8Compatible()) {
         options.addStringOption('Xdoclint:none', '-quiet')
     }
@@ -98,4 +90,3 @@ publishing {
 signing {
     sign publishing.publications.mavenJava
 }
-

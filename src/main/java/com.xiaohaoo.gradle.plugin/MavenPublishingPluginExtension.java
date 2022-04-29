@@ -17,20 +17,33 @@
 
 package com.xiaohaoo.gradle.plugin;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 /**
  * @author xiaohao
  * @version 1.0
  * @date 2022/1/22 11:07 PM
  */
 
-@Getter
-@Setter
-@NoArgsConstructor
 public class MavenPublishingPluginExtension {
     private String description;
     private String url;
+
+    public MavenPublishingPluginExtension() {
+
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }

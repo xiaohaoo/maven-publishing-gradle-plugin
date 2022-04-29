@@ -17,6 +17,7 @@
 
 package com.xiaohaoo.gradle.plugin;
 
+import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
@@ -40,7 +41,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
     private final String publicationName = "xiaohaoMavenPublishing";
 
     @Override
-    public void apply(Project rootProject) {
+    public void apply(final Project rootProject) {
 
         //应用官方MavenPublishPlugin
         applyPlugins(rootProject);
@@ -69,6 +70,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
     /**
      * 配置官方插件maven-publishing的发布信息以及task
+     *
      * @param project 项目
      */
     public void configurePublishingExtension(Project project) {
@@ -78,7 +80,6 @@ public class MavenPublishingPlugin implements Plugin<Project> {
         final String version = String.valueOf(project.getVersion());
         final String group = String.valueOf(project.getGroup());
         Map<String, ?> projectProperties = project.getProperties();
-
         //配置发布仓库
         publishingExtension.repositories(artifactRepositories -> artifactRepositories.maven(mavenArtifactRepository -> {
             final String snapshotUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/";
@@ -123,7 +124,6 @@ public class MavenPublishingPlugin implements Plugin<Project> {
                     mavenPomDeveloper.getName().set("xiaohao");
                     mavenPomDeveloper.getEmail().set("sdwenhappy@163.com");
                     project.getLogger().info("{}：mavenPomDeveloper配置信息：{}", getClass(), mavenPomDeveloper);
-
                 }));
             });
         });
@@ -131,31 +131,34 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
     /**
      * 配置签名信息
+     *
      * @param project {@code Project}
      */
     public void configureSigningExtension(Project project) {
-        SigningExtension signingExtension = project.getExtensions().getByType(SigningExtension.class);
         PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
+        SigningExtension signingExtension = project.getExtensions().getByType(SigningExtension.class);
         signingExtension.sign(publishingExtension.getPublications().getByName(publicationName));
     }
 
     /**
      * 配置javadoc任务
+     *
      * @param project {@code Project}
      */
     public void configureJavadoc(Project project) {
-        project.getTasks().withType(Javadoc.class, javadoc -> {
-            javadoc.options(minimalJavadocOptions -> {
+        if (JavaVersion.VERSION_1_8.compareTo(JavaVersion.current()) <= 0) {
+            project.getTasks().withType(Javadoc.class, javadoc -> javadoc.options(minimalJavadocOptions -> {
                 if (minimalJavadocOptions instanceof StandardJavadocDocletOptions) {
                     ((StandardJavadocDocletOptions) minimalJavadocOptions).addStringOption("Xdoclint:none", "-quiet");
                 }
-            });
-        });
+            }));
+        }
     }
 
 
     /**
      * 配置JavaPlugin
+     *
      * @param project {@code Project}
      */
     public void configureJavaPluginExtension(Project project) {
@@ -168,6 +171,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
     /**
      * 启用官方插件
+     *
      * @param project {@code Project}
      */
     public void applyPlugins(Project project) {
