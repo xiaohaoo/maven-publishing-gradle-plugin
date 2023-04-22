@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 xiaohao
+ * Copyright (c) 2022-2023 xiaohao
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -42,29 +42,20 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
     @Override
     public void apply(final Project rootProject) {
-
-        //应用官方MavenPublishPlugin
-        applyPlugins(rootProject);
-
         //创建自定义的MavenPublishingPluginExtension
         rootProject.getExtensions().create(publicationName, MavenPublishingPluginExtension.class);
-
+        //应用官方MavenPublishPlugin
+        applyPlugins(rootProject);
         rootProject.afterEvaluate(project -> {
-
             //配置发布产物
             configureJavaPluginExtension(rootProject);
-
             //发布信息配置
             configurePublishingExtension(project);
-
             //配置签名
             configureSigningExtension(project);
-
             //配置javadoc
             configureJavadoc(project);
-
             project.getLogger().info("{}：自定义发布插件配置成功", getClass());
-
         });
     }
 
