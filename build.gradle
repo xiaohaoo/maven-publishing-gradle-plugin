@@ -4,8 +4,8 @@ plugins {
     id 'signing'
 }
 
-group 'com.xiaohaoo'
-version '1.0'
+group = 'com.xiaohaoo'
+version = '1.0'
 repositories {
     mavenCentral()
     mavenLocal()
