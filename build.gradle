@@ -1,6 +1,5 @@
 plugins {
-    id 'java-gradle-plugin'
-    id 'maven-publish'
+    id "com.gradle.plugin-publish" version "1.2.0"
     id 'signing'
 }
 
@@ -16,14 +15,6 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-gradlePlugin {
-    plugins {
-        simplePlugin {
-            id = 'com.xiaohaoo.maven-publishing'
-            implementationClass = 'com.xiaohaoo.gradle.plugin.MavenPublishingPlugin'
-        }
-    }
 }
 
 
@@ -89,4 +80,18 @@ publishing {
 
 signing {
     sign publishing.publications.mavenJava
+}
+
+gradlePlugin {
+    website.set(gitUrl)
+    vcsUrl.set(gitUrl)
+    plugins {
+        create("mavenPublishingPlugin") {
+            id = 'com.xiaohaoo.maven-publishing'
+            implementationClass = 'com.xiaohaoo.gradle.plugin.MavenPublishingPlugin'
+            displayName = "Maven Publishing"
+            description = "Gradle plugin to Maven Publishing"
+            tags.set(["search", "tags", "for", "Maven", "Publishing"])
+        }
+    }
 }
