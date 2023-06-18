@@ -39,35 +39,33 @@ publishing {
             }
         }
     }
-    afterEvaluate {
-        publications {
-            withType(MavenPublication).tap {
-                configureEach {
-                    it.pom {
-                        name = project.name
-                        description = '可以用来发布到Maven中央仓库的Gradle插件'
+    publications {
+        withType(MavenPublication).tap {
+            configureEach {
+                it.pom {
+                    name = project.name
+                    description = '可以用来发布到Maven中央仓库的Gradle插件'
+                    url = gitUrl
+
+                    licenses {
+                        it.license {
+                            name = 'GNU AFFERO GENERAL PUBLIC LICENSE, Version 3'
+                            url = 'http://www.gnu.org/licenses/agpl-3.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'xiaohao'
+                            name = 'xiaohao'
+                            email = 'sdwenhappy@163.com'
+                        }
+                    }
+
+                    scm {
+                        it.connection = String.format("%s.git", gitUrl.replaceAll("httpss?", "scm:git:git"))
+                        it.developerConnection = String.format("%s.git", gitUrl.replaceAll("httpss?", "scm:git:ssh"))
                         url = gitUrl
-
-                        licenses {
-                            it.license {
-                                name = 'GNU AFFERO GENERAL PUBLIC LICENSE, Version 3'
-                                url = 'http://www.gnu.org/licenses/agpl-3.0.txt'
-                            }
-                        }
-
-                        developers {
-                            developer {
-                                id = 'xiaohao'
-                                name = 'xiaohao'
-                                email = 'sdwenhappy@163.com'
-                            }
-                        }
-
-                        scm {
-                            it.connection = String.format("%s.git", gitUrl.replaceAll("httpss?", "scm:git:git"))
-                            it.developerConnection = String.format("%s.git", gitUrl.replaceAll("httpss?", "scm:git:ssh"))
-                            url = gitUrl
-                        }
                     }
                 }
             }
