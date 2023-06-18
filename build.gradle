@@ -29,38 +29,6 @@ javadoc {
 def gitUrl = 'https://github.com/xiaohaoo/maven-publishing-gradle-plugin'
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = project.group
-            artifactId = project.name
-            version = project.version
-            from components.java
-            pom {
-                name = project.name
-                description = 'gradle发布到maven中央仓库插件'
-                url = gitUrl
-
-                licenses {
-                    license {
-                        name = 'GNU AFFERO GENERAL PUBLIC LICENSE, Version 3'
-                        url = 'http://www.gnu.org/licenses/agpl-3.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'xiaohao'
-                        name = 'xiaohao'
-                        email = 'sdwenhappy@163.com'
-                    }
-                }
-                scm {
-                    connection = String.format("%s.git", gitUrl.replaceAll("https[s]?", "scm:git:git"))
-                    developerConnection = String.format("%s.git", gitUrl.replaceAll("https[s]?", "scm:git:ssh"))
-                    url = gitUrl
-                }
-            }
-        }
-    }
     repositories {
         maven {
             name = "mavenCenter"
@@ -71,11 +39,40 @@ publishing {
             }
         }
     }
-}
+    afterEvaluate {
+        publications {
+            withType(MavenPublication).tap {
+                configureEach {
+                    it.pom {
+                        name = project.name
+                        description = '可以用来发布到Maven中央仓库的Gradle插件'
+                        url = gitUrl
 
+                        licenses {
+                            it.license {
+                                name = 'GNU AFFERO GENERAL PUBLIC LICENSE, Version 3'
+                                url = 'http://www.gnu.org/licenses/agpl-3.0.txt'
+                            }
+                        }
 
-signing {
-    sign publishing.publications.mavenJava
+                        developers {
+                            developer {
+                                id = 'xiaohao'
+                                name = 'xiaohao'
+                                email = 'sdwenhappy@163.com'
+                            }
+                        }
+
+                        scm {
+                            it.connection = String.format("%s.git", gitUrl.replaceAll("httpss?", "scm:git:git"))
+                            it.developerConnection = String.format("%s.git", gitUrl.replaceAll("httpss?", "scm:git:ssh"))
+                            url = gitUrl
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 gradlePlugin {
