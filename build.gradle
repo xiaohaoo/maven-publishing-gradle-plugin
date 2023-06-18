@@ -3,20 +3,13 @@ plugins {
     id 'signing'
 }
 
-group = 'com.xiaohaoo'
+group = 'com.xiaohaoo.gradle'
 version = '1.0.1'
+
 repositories {
     mavenCentral()
     mavenLocal()
 }
-
-dependencies {
-}
-
-test {
-    useJUnitPlatform()
-}
-
 
 java {
     withSourcesJar()
@@ -26,7 +19,10 @@ java {
 
 javadoc {
     if (JavaVersion.current().isJava8Compatible()) {
-        options.addStringOption('Xdoclint:none', '-quiet')
+        options {
+            it as StandardJavadocDocletOptions
+            it.addBooleanOption("Xdoclint:none", true)
+        }
     }
 }
 
@@ -41,7 +37,7 @@ publishing {
             from components.java
             pom {
                 name = project.name
-                description = 'gradle发布到maven仓库插件'
+                description = 'gradle发布到maven中央仓库插件'
                 url = gitUrl
 
                 licenses {
@@ -86,7 +82,7 @@ gradlePlugin {
     website.set(gitUrl)
     vcsUrl.set(gitUrl)
     plugins {
-        create("mavenPublishingPlugin") {
+        mavenPublishingPlugin {
             id = 'com.xiaohaoo.maven-publishing'
             implementationClass = 'com.xiaohaoo.gradle.plugin.MavenPublishingPlugin'
             displayName = "Maven Publishing"

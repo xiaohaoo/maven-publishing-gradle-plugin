@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 xiaohao
+ * Copyright (c) 2022-2023 xiaohao
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -24,11 +24,22 @@ package com.xiaohaoo.gradle.plugin;
  */
 
 public class MavenPublishingPluginExtension {
+    //项目的描述
     private String description;
+    //项目的url
     private String url;
+    //项目的类型：java、javaPlatform
+    private String component;
 
     public MavenPublishingPluginExtension() {
+    }
 
+    public String getComponent() {
+        return component;
+    }
+
+    public void setComponent(String component) {
+        this.component = component;
     }
 
     public String getDescription() {

@@ -90,8 +90,13 @@ public class MavenPublishingPlugin implements Plugin<Project> {
             mavenPublishing.setArtifactId(name);
             mavenPublishing.setVersion(version);
 
-            mavenPublishing.from(project.getComponents().getByName("java"));
-
+            //设置打包类型
+            String component = mavenPublishingPluginExtension.getComponent();
+            if (component == null || component.equals("")) {
+                component = "java";
+            }
+            mavenPublishing.from(project.getComponents().getByName(component));
+            //设置发布的POM信息
             mavenPublishing.pom(mavenPom -> {
                 mavenPom.getName().set(name);
                 mavenPom.getDescription().set(mavenPublishingPluginExtension.getDescription());
@@ -153,12 +158,13 @@ public class MavenPublishingPlugin implements Plugin<Project> {
      * @param project {@code Project}
      */
     public void configureJavaPluginExtension(Project project) {
-        project.getExtensions().configure(JavaPluginExtension.class, javaPluginExtension -> {
-            javaPluginExtension.withJavadocJar();
-            javaPluginExtension.withSourcesJar();
-        });
+        if (project.getPlugins().hasPlugin("java")) {
+            project.getExtensions().configure(JavaPluginExtension.class, javaPluginExtension -> {
+                javaPluginExtension.withJavadocJar();
+                javaPluginExtension.withSourcesJar();
+            });
+        }
     }
-
 
     /**
      * 启用官方插件
