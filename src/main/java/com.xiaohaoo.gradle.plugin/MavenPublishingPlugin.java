@@ -20,7 +20,6 @@ package com.xiaohaoo.gradle.plugin;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
@@ -38,41 +37,46 @@ import java.util.Map;
  */
 public class MavenPublishingPlugin implements Plugin<Project> {
 
-    private final String publicationName = "xiaohaoMavenPublishing";
+    private final String defaultPublicationName = "xiaohaoMavenPublishing";
 
     @Override
     public void apply(final Project rootProject) {
         //创建自定义的MavenPublishingPluginExtension
-        rootProject.getExtensions().create(publicationName, MavenPublishingPluginExtension.class);
+        rootProject.getExtensions().create(defaultPublicationName, MavenPublishingPluginExtension.class);
         //应用官方MavenPublishPlugin
         applyPlugins(rootProject);
 
-        rootProject.afterEvaluate(project -> {
-            //配置发布产物
-            configureJavaPluginExtension(rootProject);
-            //发布信息配置
-            configurePublishingExtension(project);
-            //配置签名
-            configureSigningExtension(project);
-            //配置javadoc
-            configureJavadoc(project);
-            project.getLogger().info("{}：自定义发布插件配置成功", getClass());
-        });
+        rootProject.afterEvaluate(this::configurePublishing);
     }
 
-    /**
-     * 配置官方插件maven-publishing的发布信息以及task
-     *
-     * @param project 项目
-     */
-    public void configurePublishingExtension(Project project) {
+    private void configurePublishing(Project project) {
         PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
         MavenPublishingPluginExtension mavenPublishingPluginExtension = project.getExtensions().getByType(MavenPublishingPluginExtension.class);
         final String name = project.getName();
         final String version = String.valueOf(project.getVersion());
         final String group = String.valueOf(project.getGroup());
+
+        configureRepositories(project);
+
+        publishingExtension.publications(publications -> {
+            MavenPublication mavenPublication = publications.create(defaultPublicationName, MavenPublication.class);
+            mavenPublication.setGroupId(group);
+            mavenPublication.setArtifactId(name);
+            mavenPublication.setVersion(version);
+            configurePackaging(project, mavenPublication);
+            configurePom(project, mavenPublication);
+        });
+
+        configureSigning(project);
+        configureJavadoc(project);
+        project.getLogger().info("{}: 自定义发布插件配置成功", getClass());
+    }
+
+    private void configureRepositories(Project project) {
+        final String version = String.valueOf(project.getVersion());
         Map<String, ?> projectProperties = project.getProperties();
-        //配置发布仓库
+        PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
+
         publishingExtension.repositories(artifactRepositories -> artifactRepositories.maven(mavenArtifactRepository -> {
             final String snapshotUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/";
             final String releaseUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/";
@@ -83,98 +87,64 @@ public class MavenPublishingPlugin implements Plugin<Project> {
                 passwordCredentials.setPassword(projectProperties.get("ossrhPassword").toString());
             });
         }));
+    }
 
-        //配置发布信息
-        publishingExtension.publications(publications -> {
-            MavenPublication mavenPublishing = publications.create(publicationName, MavenPublication.class);
-            mavenPublishing.setGroupId(group);
-            mavenPublishing.setArtifactId(name);
-            mavenPublishing.setVersion(version);
+    private void configurePackaging(Project project, MavenPublication mavenPublication) {
+        MavenPublishingPluginExtension mavenPublishingPluginExtension = project.getExtensions().getByType(MavenPublishingPluginExtension.class);
 
-            //设置打包类型
-            String component = mavenPublishingPluginExtension.getComponent().get();
-            if (component.isEmpty()) {
-                component = "java";
-            }
-            mavenPublishing.from(project.getComponents().getByName(component));
-            //设置发布的POM信息
-            mavenPublishing.pom(mavenPom -> {
-                mavenPom.getName().set(name);
-                mavenPom.getDescription().set(mavenPublishingPluginExtension.getDescription());
-                mavenPom.getUrl().set(mavenPublishingPluginExtension.getUrl());
-                mavenPom.scm(mavenPomScm -> {
-                    final String gitUrl = mavenPublishingPluginExtension.getUrl().get();
-                    mavenPomScm.getConnection().set(String.format("%s.git", gitUrl.replaceAll("https[s]?", "scm:git:git")));
-                    mavenPomScm.getDeveloperConnection().set(String.format("%s.git", gitUrl.replaceAll("https[s]?", "scm:git:ssh")));
-                    mavenPomScm.getUrl().set(mavenPublishingPluginExtension.getUrl());
-                });
+        String component = mavenPublishingPluginExtension.getComponent().get();
+        if (component.isEmpty()) {
+            component = "java";
+        }
+        mavenPublication.from(project.getComponents().getByName(component));
+    }
 
-                project.getLogger().info("{}：mavenPublishingPluginExtension配置信息：{}", getClass(), mavenPublishingPluginExtension);
-
-                mavenPom.licenses(mavenPomLicenseSpec -> mavenPomLicenseSpec.license(mavenPomLicense -> {
-                    mavenPomLicense.getName().set("GNU AFFERO GENERAL PUBLIC LICENSE, Version 3");
-                    mavenPomLicense.getUrl().set("http://www.gnu.org/licenses/agpl-3.0.txt");
-                }));
-
-                mavenPom.developers(mavenPomDeveloperSpec -> mavenPomDeveloperSpec.developer(mavenPomDeveloper -> {
-                    mavenPomDeveloper.getId().set("xiaohao");
-                    mavenPomDeveloper.getName().set("xiaohao");
-                    mavenPomDeveloper.getEmail().set("sdwenhappy@163.com");
-                    project.getLogger().info("{}：mavenPomDeveloper配置信息：{}", getClass(), mavenPomDeveloper);
-                }));
+    private void configurePom(Project project, MavenPublication mavenPublication) {
+        final String name = project.getName();
+        MavenPublishingPluginExtension mavenPublishingPluginExtension = project.getExtensions().getByType(MavenPublishingPluginExtension.class);
+        mavenPublication.pom(mavenPom -> {
+            mavenPom.getName().set(name);
+            mavenPom.getDescription().set(mavenPublishingPluginExtension.getDescription());
+            mavenPom.getUrl().set(mavenPublishingPluginExtension.getUrl());
+            mavenPom.scm(mavenPomScm -> {
+                final String gitUrl = mavenPublishingPluginExtension.getUrl().get();
+                mavenPomScm.getConnection().set(String.format("%s.git", gitUrl.replaceAll("httpss?", "scm:git:")));
+                mavenPomScm.getDeveloperConnection().set(String.format("%s.git", gitUrl));
+                mavenPomScm.getUrl().set(gitUrl);
             });
+            mavenPom.licenses(licenses -> licenses.license(license -> {
+                license.getName().set("GNU AFFERO GENERAL PUBLIC LICENSE, Version 3");
+                license.getUrl().set("http://www.gnu.org/licenses/agpl-3.0.txt");
+            }));
+            mavenPom.developers(developers -> developers.developer(developer -> {
+                developer.getId().set("xiaohao");
+                developer.getName().set("xiaohao");
+                developer.getEmail().set("sdwenhappy@163.com");
+            }));
         });
     }
 
-    /**
-     * 配置签名信息
-     *
-     * @param project {@code Project}
-     */
-    public void configureSigningExtension(Project project) {
-        PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
-        SigningExtension signingExtension = project.getExtensions().getByType(SigningExtension.class);
-        signingExtension.sign(publishingExtension.getPublications().getByName(publicationName));
+    private void configureSigning(Project project) {
+        project.getPlugins().withType(SigningPlugin.class, signingPlugin -> {
+            SigningExtension signingExtension = project.getExtensions().getByType(SigningExtension.class);
+            PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
+            signingExtension.sign(publishingExtension.getPublications());
+        });
     }
 
-    /**
-     * 配置javadoc任务
-     *
-     * @param project {@code Project}
-     */
-    public void configureJavadoc(Project project) {
+    private void configureJavadoc(Project project) {
         if (JavaVersion.VERSION_1_8.compareTo(JavaVersion.current()) <= 0) {
             project.getTasks().withType(Javadoc.class, javadoc -> javadoc.options(minimalJavadocOptions -> {
                 if (minimalJavadocOptions instanceof StandardJavadocDocletOptions) {
+                    minimalJavadocOptions.setEncoding("UTF-8");
                     ((StandardJavadocDocletOptions) minimalJavadocOptions).addStringOption("Xdoclint:none", "-quiet");
                 }
             }));
         }
     }
 
-
-    /**
-     * 配置JavaPlugin
-     *
-     * @param project {@code Project}
-     */
-    public void configureJavaPluginExtension(Project project) {
-        if (project.getPlugins().hasPlugin("java")) {
-            project.getExtensions().configure(JavaPluginExtension.class, javaPluginExtension -> {
-                javaPluginExtension.withJavadocJar();
-                javaPluginExtension.withSourcesJar();
-            });
-        }
+    private void applyPlugins(Project project) {
+        project.getPlugins().apply(MavenPublishPlugin.class);
+        project.getPlugins().apply(SigningPlugin.class);
     }
-
-    /**
-     * 启用官方插件
-     *
-     * @param project {@code Project}
-     */
-    public void applyPlugins(Project project) {
-        project.getPluginManager().apply(MavenPublishPlugin.class);
-        project.getPluginManager().apply(SigningPlugin.class);
-    }
-
 }

@@ -17,7 +17,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.xiaohaoo:maven-publishing-gradle-plugin:1.0.1'
+        classpath 'com.xiaohaoo:maven-publishing-gradle-plugin:1.0.2'
     }
 }
 
@@ -41,7 +41,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.xiaohaoo:maven-publishing-gradle-plugin:1.0.1")
+        classpath("com.xiaohaoo:maven-publishing-gradle-plugin:1.0.2")
     }
 }
 
