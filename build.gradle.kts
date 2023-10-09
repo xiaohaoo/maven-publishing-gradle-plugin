@@ -21,7 +21,7 @@ plugins {
     signing
 }
 
-group = "com.xiaohaoo.gradle"
+group = "com.xiaohaoo"
 version = "1.0.2"
 
 repositories {
