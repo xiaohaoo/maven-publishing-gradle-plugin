@@ -33,8 +33,6 @@ xiaohaoMavenPublishing {
 - kotlin
 
 ```kotlin
-import com.xiaohaoo.gradle.plugin.MavenPublishingPluginExtension
-
 buildscript {
     repositories {
         mavenLocal()
@@ -47,7 +45,7 @@ buildscript {
 
 apply(plugin = "com.xiaohaoo.maven-publishing")
 
-configure<MavenPublishingPluginExtension> {
+configure<com.xiaohaoo.gradle.plugin.MavenPublishingPluginExtension> {
     url = "https://github.com/xiaohaoo/maven-publishing-gradle-plugin"
     description = "发布到maven仓库的Gradle插件"
 }
