@@ -20,6 +20,7 @@ package com.xiaohaoo.gradle.plugin;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.provider.Property;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
@@ -91,12 +92,8 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
     private void configurePackaging(Project project, MavenPublication mavenPublication) {
         MavenPublishingPluginExtension mavenPublishingPluginExtension = project.getExtensions().getByType(MavenPublishingPluginExtension.class);
-
-        String component = mavenPublishingPluginExtension.getComponent().get();
-        if (component.isEmpty()) {
-            component = "java";
-        }
-        mavenPublication.from(project.getComponents().getByName(component));
+        Property<String> component = mavenPublishingPluginExtension.getComponent().convention("java");
+        mavenPublication.from(project.getComponents().getByName(component.get()));
     }
 
     private void configurePom(Project project, MavenPublication mavenPublication) {
