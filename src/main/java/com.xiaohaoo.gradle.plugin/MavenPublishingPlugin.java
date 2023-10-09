@@ -46,6 +46,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
         rootProject.getExtensions().create(publicationName, MavenPublishingPluginExtension.class);
         //应用官方MavenPublishPlugin
         applyPlugins(rootProject);
+
         rootProject.afterEvaluate(project -> {
             //配置发布产物
             configureJavaPluginExtension(rootProject);
@@ -78,8 +79,8 @@ public class MavenPublishingPlugin implements Plugin<Project> {
             mavenArtifactRepository.setName("MavenCenter");
             mavenArtifactRepository.setUrl(version.endsWith("SNAPSHOT") ? snapshotUrl : releaseUrl);
             mavenArtifactRepository.credentials(passwordCredentials -> {
-                passwordCredentials.setUsername(String.valueOf(projectProperties.get("ossrhUsername")));
-                passwordCredentials.setPassword(String.valueOf(projectProperties.get("ossrhPassword")));
+                passwordCredentials.setUsername(projectProperties.get("ossrhUsername").toString());
+                passwordCredentials.setPassword(projectProperties.get("ossrhPassword").toString());
             });
         }));
 
@@ -91,8 +92,8 @@ public class MavenPublishingPlugin implements Plugin<Project> {
             mavenPublishing.setVersion(version);
 
             //设置打包类型
-            String component = mavenPublishingPluginExtension.getComponent();
-            if (component == null || component.equals("")) {
+            String component = mavenPublishingPluginExtension.getComponent().get();
+            if (component.isEmpty()) {
                 component = "java";
             }
             mavenPublishing.from(project.getComponents().getByName(component));
@@ -102,7 +103,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
                 mavenPom.getDescription().set(mavenPublishingPluginExtension.getDescription());
                 mavenPom.getUrl().set(mavenPublishingPluginExtension.getUrl());
                 mavenPom.scm(mavenPomScm -> {
-                    final String gitUrl = mavenPublishingPluginExtension.getUrl();
+                    final String gitUrl = mavenPublishingPluginExtension.getUrl().get();
                     mavenPomScm.getConnection().set(String.format("%s.git", gitUrl.replaceAll("https[s]?", "scm:git:git")));
                     mavenPomScm.getDeveloperConnection().set(String.format("%s.git", gitUrl.replaceAll("https[s]?", "scm:git:ssh")));
                     mavenPomScm.getUrl().set(mavenPublishingPluginExtension.getUrl());

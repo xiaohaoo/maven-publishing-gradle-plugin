@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 xiaohao
+ * Copyright (c) 2023 xiaohao
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,5 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.xiaohaoo.gradle.plugin;
+rootProject.name = "maven-publishing-gradle-plugin"
 
-import org.gradle.api.provider.Property;
-
-/**
- * @author xiaohao
- * @version 1.0
- * @since 2022/1/22 11:07 PM
- */
-
-public interface MavenPublishingPluginExtension {
-    Property<String> getUrl();
-
-    //项目的描述
-    Property<String> getDescription();
-
-    Property<String> getComponent();
-}
