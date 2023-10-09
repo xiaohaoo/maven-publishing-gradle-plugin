@@ -20,6 +20,7 @@ package com.xiaohaoo.gradle.plugin;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Property;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
@@ -52,7 +53,6 @@ public class MavenPublishingPlugin implements Plugin<Project> {
 
     private void configurePublishing(Project project) {
         PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
-        MavenPublishingPluginExtension mavenPublishingPluginExtension = project.getExtensions().getByType(MavenPublishingPluginExtension.class);
         final String name = project.getName();
         final String version = String.valueOf(project.getVersion());
         final String group = String.valueOf(project.getGroup());
@@ -67,7 +67,7 @@ public class MavenPublishingPlugin implements Plugin<Project> {
             configurePackaging(project, mavenPublication);
             configurePom(project, mavenPublication);
         });
-
+        configureJavaPlugin(project);
         configureSigning(project);
         configureJavadoc(project);
         project.getLogger().info("{}: 自定义发布插件配置成功", getClass());
@@ -137,6 +137,15 @@ public class MavenPublishingPlugin implements Plugin<Project> {
                     ((StandardJavadocDocletOptions) minimalJavadocOptions).addStringOption("Xdoclint:none", "-quiet");
                 }
             }));
+        }
+    }
+
+    public void configureJavaPlugin(Project project) {
+        if (project.getPlugins().hasPlugin("java")) {
+            project.getExtensions().configure(JavaPluginExtension.class, javaPluginExtension -> {
+                javaPluginExtension.withJavadocJar();
+                javaPluginExtension.withSourcesJar();
+            });
         }
     }
 
