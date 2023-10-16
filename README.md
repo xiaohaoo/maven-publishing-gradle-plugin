@@ -17,7 +17,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.xiaohaoo:maven-publishing-gradle-plugin:1.0.2'
+        classpath 'com.xiaohaoo:maven-publishing-gradle-plugin:1.0.3'
     }
 }
 
@@ -33,19 +33,20 @@ xiaohaoMavenPublishing {
 - kotlin
 
 ```kotlin
-buildscript {
+//settings.gradle.kts
+pluginManagement {
     repositories {
         mavenLocal()
         mavenCentral()
     }
-    dependencies {
-        classpath("com.xiaohaoo:maven-publishing-gradle-plugin:1.0.2")
-    }
 }
 
-apply(plugin = "com.xiaohaoo.maven-publishing")
+//build.gradle.kts
+plugins {
+    id("com.xiaohaoo.maven-publishing") version "1.0.3"
+}
 
-configure<com.xiaohaoo.gradle.plugin.MavenPublishingPluginExtension> {
+xiaohaoMavenPublishing {
     url = "https://github.com/xiaohaoo/maven-publishing-gradle-plugin"
     description = "发布到maven仓库的Gradle插件"
 }

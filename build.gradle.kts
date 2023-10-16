@@ -22,7 +22,7 @@ plugins {
 }
 
 group = "com.xiaohaoo"
-version = "1.0.2"
+version = "1.0.3"
 
 repositories {
     mavenCentral()
@@ -63,19 +63,17 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("mavenPublication") {
+        withType<MavenPublication>() {
             pom {
-                from(components["java"])
+                url.set(gitUrl)
                 name.set(project.name)
                 description.set("可以用来发布到Maven中央仓库的Gradle插件")
-                url.set(gitUrl)
                 licenses {
                     license {
                         name.set("GNU AFFERO GENERAL PUBLIC LICENSE, Version 3")
                         url.set("http://www.gnu.org/licenses/agpl-3.0.txt")
                     }
                 }
-
                 developers {
                     developer {
                         id.set("xiaohao")
@@ -83,7 +81,6 @@ publishing {
                         email.set("sdwenhappy@163.com")
                     }
                 }
-
                 scm {
                     connection.set("${gitUrl.replace(Regex("https?"), "scm:git:git")}.git")
                     developerConnection.set("${gitUrl.replace(Regex("https?"), "scm:git:ssh")}.git")
@@ -91,11 +88,16 @@ publishing {
                 }
             }
         }
+        create<MavenPublication>("mavenPublication") {
+            pom {
+                from(components["java"])
+            }
+        }
     }
 }
 
 signing {
-    sign(publishing.publications["mavenPublication"])
+    sign(publishing.publications)
 }
 
 gradlePlugin {
@@ -108,4 +110,3 @@ gradlePlugin {
         }
     }
 }
-
